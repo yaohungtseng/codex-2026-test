@@ -1,0 +1,1342 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>國高中音樂科教甄備考工具</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #5b6572;
+      --line: #d8dee6;
+      --soft: #f5f7fa;
+      --paper: #ffffff;
+      --accent: #2b6f6a;
+      --accent-2: #8b5e34;
+      --accent-3: #2f5c9a;
+      --ok: #1f7a4d;
+      --bad: #b33a3a;
+      --warn: #8a6500;
+      --shadow: 0 10px 30px rgba(23, 33, 43, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      color: var(--ink);
+      background: #edf1f5;
+      letter-spacing: 0;
+    }
+
+    button, select {
+      font: inherit;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+    }
+
+    aside {
+      background: #f9fafb;
+      border-right: 1px solid var(--line);
+      padding: 22px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    main {
+      padding: 22px;
+      min-width: 0;
+    }
+
+    .brand {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .brand h1 {
+      font-size: 22px;
+      line-height: 1.25;
+      margin: 0;
+      color: #0f2934;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+      line-height: 1;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .metric span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .control-group {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 9px 10px;
+      min-height: 40px;
+    }
+
+    .mode-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: #e8edf2;
+      padding: 5px;
+      border-radius: 8px;
+      margin-top: 16px;
+    }
+
+    .mode-tabs button {
+      border: 0;
+      background: transparent;
+      border-radius: 6px;
+      min-height: 38px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .mode-tabs button.active {
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 0 1px 4px rgba(23, 33, 43, 0.12);
+      font-weight: 700;
+    }
+
+    .primary {
+      border: 0;
+      background: var(--accent);
+      color: white;
+      border-radius: 8px;
+      padding: 10px 12px;
+      min-height: 42px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .secondary {
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 9px 12px;
+      min-height: 40px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .status-list {
+      margin-top: 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      border-bottom: 1px solid #e5e9ee;
+      padding-bottom: 7px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .status-row strong {
+      color: var(--ink);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .panel-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .panel-head h2 {
+      font-size: 18px;
+      margin: 0;
+      line-height: 1.35;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      color: #334155;
+      background: #eef2f6;
+      border: 1px solid #d8dee6;
+    }
+
+    .tag.major { background: #e7f3f1; color: #14524f; border-color: #bcded9; }
+    .tag.warn { background: #fff4d8; color: #6c4b00; border-color: #eed592; }
+
+    .question-body {
+      padding: 18px;
+    }
+
+    .question-text {
+      font-size: 19px;
+      line-height: 1.65;
+      margin: 0 0 16px;
+      font-weight: 700;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px 14px;
+      min-height: 52px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      line-height: 1.45;
+    }
+
+    .option:hover { border-color: #9db8ca; background: #f8fbfd; }
+    .option.selected { border-color: var(--accent-3); background: #edf5ff; }
+    .option.correct { border-color: var(--ok); background: #edf8f2; }
+    .option.incorrect { border-color: var(--bad); background: #fff0f0; }
+
+    .letter {
+      width: 28px;
+      height: 28px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: #f7f9fb;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .question-actions {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .feedback {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #f7faf9;
+      border: 1px solid #cde5dd;
+      display: none;
+    }
+
+    .feedback.show { display: grid; gap: 9px; }
+    .feedback.bad { background: #fff6f6; border-color: #efc7c7; }
+
+    .feedback h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .feedback p {
+      margin: 0;
+      line-height: 1.65;
+      color: #26323f;
+    }
+
+    .book {
+      padding: 16px 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .book h2, .book h3 {
+      margin: 0;
+    }
+
+    .book h2 {
+      font-size: 18px;
+      color: #0f2934;
+    }
+
+    .book h3 {
+      font-size: 15px;
+      color: var(--accent-2);
+    }
+
+    .book p, .book li {
+      line-height: 1.7;
+      color: #26323f;
+    }
+
+    .book p {
+      margin: 0;
+    }
+
+    .book ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      display: grid;
+      gap: 6px;
+    }
+
+    .progress {
+      height: 9px;
+      background: #e5e9ef;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-3));
+    }
+
+    .source-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfd;
+      display: grid;
+      gap: 6px;
+    }
+
+    .source-card strong {
+      color: #0f2934;
+    }
+
+    .source-card span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .source-card a {
+      color: var(--accent-3);
+      overflow-wrap: anywhere;
+    }
+
+    .mistake-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mistake-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      display: grid;
+      gap: 8px;
+    }
+
+    .mistake-item h3 {
+      color: var(--ink);
+    }
+
+    .mistake-item p {
+      margin: 0;
+    }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .chapter {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: #fff;
+      cursor: pointer;
+      min-height: 130px;
+    }
+
+    .chapter.active {
+      border-color: var(--accent);
+      background: #f1faf8;
+    }
+
+    .chapter h3 {
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .chapter p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 980px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main { padding: 12px; }
+      aside { padding: 16px 12px; }
+      .panel-head {
+        display: grid;
+      }
+      .book-grid {
+        grid-template-columns: 1fr;
+      }
+      .question-text {
+        font-size: 17px;
+      }
+      .metrics {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .metric {
+        padding: 8px 6px;
+      }
+      .metric strong {
+        font-size: 18px;
+      }
+    }
+
+    @media print {
+      body { background: #fff; }
+      aside, .question-actions, .mode-tabs, .control-group { display: none; }
+      .shell, .workspace { display: block; }
+      main { padding: 0; }
+      .panel { box-shadow: none; border: 0; page-break-inside: avoid; }
+      .hidden { display: block; }
+      .source-card a { color: var(--ink); text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <div class="brand">
+        <h1>國高中音樂科教甄備考</h1>
+        <p>依 110-114 年全台音樂科專業科目試題整理，練題、解析、來源與書本重點整合。</p>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><strong id="answeredCount">0</strong><span>已答</span></div>
+        <div class="metric"><strong id="correctCount">0</strong><span>答對</span></div>
+        <div class="metric"><strong id="accuracyRate">0%</strong><span>正確率</span></div>
+        <div class="metric"><strong id="streakCount">0</strong><span>連對</span></div>
+      </div>
+      <div class="progress" aria-label="答題進度"><span id="progressBar"></span></div>
+
+      <div class="mode-tabs" role="tablist" aria-label="模式">
+        <button class="active" data-mode="practice">練題</button>
+        <button data-mode="book">書本</button>
+        <button data-mode="mistakes">錯題</button>
+        <button data-mode="sources">來源</button>
+      </div>
+
+      <div class="control-group">
+        <label for="topicFilter">主題</label>
+        <select id="topicFilter"></select>
+      </div>
+
+      <div class="control-group">
+        <label for="levelFilter">層級</label>
+        <select id="levelFilter">
+          <option value="all">全部</option>
+          <option value="國中">國中</option>
+          <option value="高中">高中</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <button class="primary" id="newRoundBtn">開始本組題目</button>
+        <button class="secondary" id="resetBtn">重置紀錄</button>
+        <button class="secondary" id="printBtn">列印講義</button>
+      </div>
+
+      <div class="status-list">
+        <div class="status-row"><span>收集試題</span><strong>50 份</strong></div>
+        <div class="status-row"><span>年份範圍</span><strong>110-114</strong></div>
+        <div class="status-row"><span>題目形式</span><strong>改寫練習題</strong></div>
+      </div>
+    </aside>
+
+    <main>
+      <section class="workspace" id="practiceView">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 id="questionTitle">題目</h2>
+            <div class="tag-row" id="questionTags"></div>
+          </div>
+          <div class="question-body">
+            <p class="question-text" id="questionText"></p>
+            <div class="options" id="options"></div>
+            <div class="question-actions">
+              <button class="primary" id="checkBtn">送出答案</button>
+              <button class="secondary" id="nextBtn">下一題</button>
+            </div>
+            <div class="feedback" id="feedback"></div>
+          </div>
+        </article>
+
+        <aside class="panel book" aria-label="本題重點">
+          <h2>本題書本重點</h2>
+          <div id="focusBook"></div>
+          <div class="source-card">
+            <strong>依據考題</strong>
+            <span id="sourceText"></span>
+            <a id="sourceLink" href="#" target="_blank" rel="noopener">開啟來源</a>
+          </div>
+        </aside>
+      </section>
+
+      <section class="panel book hidden" id="bookView">
+        <h2>書本內容</h2>
+        <div class="book-grid" id="bookGrid"></div>
+        <div id="chapterDetail"></div>
+      </section>
+
+      <section class="panel book hidden" id="mistakesView">
+        <h2>錯題本</h2>
+        <p>答錯的題目會自動留在這裡，方便回頭複習解析與書本重點。</p>
+        <div class="question-actions">
+          <button class="secondary" id="clearMistakesBtn">清空錯題</button>
+        </div>
+        <div class="mistake-list" id="mistakesList"></div>
+      </section>
+
+      <section class="panel book hidden" id="sourcesView">
+        <h2>資料來源</h2>
+        <p>本工具依已整理的 110-114 年國高中音樂科教師甄選專業科目資料建置。練習題為依高頻考點改寫，不逐字重製原題。</p>
+        <div id="sourcesList"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const chapters = [
+      {
+        id: "theory",
+        title: "樂理與和聲",
+        summary: "音程、音階、調性、終止式、和弦功能、轉調與四部和聲是國中選擇題與高中非選題的共同核心。",
+        points: [
+          "大調常用 I、IV、V、V7 建立功能和聲，終止式要分清正格、半終止、變格與欺騙終止。",
+          "移調樂器題要先確認實音與記譜音的距離，例如 B♭ 單簧管記譜音比實音高大二度。",
+          "曲式分析常從樂句、終止、主題回歸、調性布局判斷二段、三段、輪旋或奏鳴曲式。",
+          "和聲寫作重視聲部進行、避免平行五八度、導音解決與低音線條。"
+        ]
+      },
+      {
+        id: "history",
+        title: "西洋音樂史",
+        summary: "巴洛克、古典、浪漫、民族樂派、印象樂派與二十世紀音樂常以作曲家、作品、風格特徵配對出題。",
+        points: [
+          "巴洛克常見通奏低音、賦格、協奏曲與組曲；Bach、Handel、Vivaldi 是高頻人物。",
+          "古典時期重視均衡句法、奏鳴曲式與交響曲發展；Haydn、Mozart、Beethoven 是核心。",
+          "浪漫時期題目常考藝術歌曲、標題音樂、交響詩、民族樂派與鋼琴小品。",
+          "現代音樂需掌握印象、表現、十二音、機遇、極簡等概念與代表作曲家。"
+        ]
+      },
+      {
+        id: "taiwan",
+        title: "台灣與中國音樂",
+        summary: "台灣傳統音樂、南管、北管、歌仔戲、客家音樂、原住民族音樂與國樂器是近年高頻重點。",
+        points: [
+          "南管風格細緻典雅，與泉州文化密切；北管常見於廟會、戲曲與民間儀式，聲響較熱鬧。",
+          "歌仔戲由台灣在地發展，唱腔、身段、劇目與胡琴伴奏常出現在考題。",
+          "國樂器需分清吹、拉、彈、打，以及樂器音色、形制、演奏法與常見合奏位置。",
+          "原住民族音樂常考複音唱法、祭儀、族群音樂特色與文化脈絡。"
+        ]
+      },
+      {
+        id: "instrumentation",
+        title: "樂器與配器",
+        summary: "樂器族群、音域、移調、演奏法、管弦樂編制與伴奏能力常見於高中甄選題。",
+        points: [
+          "管弦樂四大族群為弦樂、木管、銅管、打擊；題目常考音色、音域與樂器位置。",
+          "常見移調樂器包含 B♭ 單簧管、B♭ 小號、F 法國號與 E♭ 薩氏管。",
+          "配器題要考慮音域可行性、音色平衡、旋律主從、伴奏織度與學生演奏能力。",
+          "舞蹈伴奏與合唱伴奏常考即興、節奏穩定、調性掌握與曲風辨識。"
+        ]
+      },
+      {
+        id: "pedagogy",
+        title: "課綱、教學與評量",
+        summary: "108 課綱、素養導向、教案設計、學習表現、實作評量與鑑賞引導是近年必讀。",
+        points: [
+          "素養導向題目重視情境、任務、策略、反思與可觀察表現，不只是知識背誦。",
+          "音樂課教案通常要交代學習目標、教材分析、活動流程、差異化、評量規準與延伸任務。",
+          "實作評量需有清楚規準，例如音準、節奏、表情、合作、創意與反思。",
+          "鑑賞教學可由音樂元素切入：旋律、節奏、和聲、音色、織度、曲式、風格與文化脈絡。"
+        ]
+      },
+      {
+        id: "digital",
+        title: "數位、AI 與音樂科技",
+        summary: "AI、數位學習、編曲軟體、智慧財產權與媒體素養已開始出現在最新年度命題。",
+        points: [
+          "AI 可協助生成伴奏、示範、回饋與差異化材料，但教師仍需檢核正確性、偏誤與著作權。",
+          "數位工具適合做聆賞標註、錄音回饋、節奏創作、編曲與學習歷程蒐集。",
+          "音樂科技題常連結教學設計：工具不是目的，需回到學習目標與評量證據。",
+          "智慧財產權與授權來源是數位音樂課常見風險點。"
+        ]
+      }
+    ];
+
+    const sources = [
+      { label: "114 高雄市立國民中學教師聯合甄選：音樂", level: "國中", year: "114", url: "https://yamol.tw/exam-114%E5%B9%B4++114+%E9%AB%98%E9%9B%84%E5%B8%82%E5%B8%82%E7%AB%8B%E5%9C%8B%E6%B0%91%E4%B8%AD%E5%AD%B8%E6%95%99%E5%B8%AB%E8%81%AF%E5%90%88%E7%94%84%E9%81%B8%EF%BC%9A%E9%9F%B3%E6%A8%82128212-128212.htm" },
+      { label: "114 桃園市國民中學新進教師聯合甄選：音樂科", level: "國中", year: "114", url: "https://www.gsjh.tyc.edu.tw/modules/tadnews/index.php?nsn=14126" },
+      { label: "114 新北市立國民中學教師聯合甄選：音樂科", level: "國中", year: "114", url: "https://yamol.tw/exam-114%E5%B9%B4++114+%E6%96%B0%E5%8C%97%E5%B8%82%E7%AB%8B%E5%9C%8B%E6%B0%91%E4%B8%AD%E5%AD%B8_%E6%95%99%E5%B8%AB%E8%81%AF%E5%90%88%E7%94%84%E9%81%B8%E8%A9%A6%E9%A1%8C%EF%BC%9A%E9%9F%B3%E6%A8%82%E7%A7%91127226-127226.htm" },
+      { label: "114 教育部受託辦理公立高級中等學校教師甄選：音樂科", level: "高中", year: "114", url: "https://yamol.tw/exam-114%E5%B9%B4++114+%E6%95%99%E8%82%B2%E9%83%A8%E5%8F%97%E8%A8%97%E8%BE%A6%E7%90%86_%E5%85%AC%E7%AB%8B%E9%AB%98%E7%B4%9A%E4%B8%AD%E7%AD%89%E5%AD%B8%E6%A0%A1%E6%95%99%E5%B8%AB%E7%94%84%E9%81%B8%E8%A9%A6%E9%A1%8C%EF%BC%9A%E9%9F%B3%E6%A8%82%E7%A7%91126940-126940.htm" },
+      { label: "113 高雄市立高級中等學校聯合教師甄選：音樂科", level: "高中", year: "113", url: "https://yamol.tw/exam-113%E5%B9%B4++113+%E9%AB%98%E9%9B%84%E5%B8%82%E5%B8%82%E7%AB%8B%E9%AB%98%E7%B4%9A%E4%B8%AD%E7%AD%89%E5%AD%B8%E6%A0%A1%E8%81%AF%E5%90%88%E6%95%99%E5%B8%AB%E7%94%84%E9%81%B8%E8%A9%A6%E9%A1%8C%EF%BC%9A%E9%9F%B3%E6%A8%82%E7%A7%91121823-121823.htm" },
+      { label: "113 新北市公立高級中等學校教師聯合甄選：音樂科", level: "高中", year: "113", url: "https://yamol.tw/exam-113%E5%B9%B4++113+%E6%96%B0%E5%8C%97%E5%B8%82%E5%85%AC%E7%AB%8B%E9%AB%98%E7%B4%9A%E4%B8%AD%E7%AD%89%E5%AD%B8%E6%A0%A1%E6%95%99%E5%B8%AB%E8%81%AF%E5%90%88%E7%94%84%E9%81%B8%E8%A9%A6%E9%A1%8C%EF%BC%9A%E9%9F%B3%E6%A8%82%E7%A7%91119683-119683.htm" },
+      { label: "112 新北市立國民中學教師聯合甄選：音樂科", level: "國中", year: "112", url: "https://yamol.tw/cat-%E6%95%99%E7%94%84%E2%97%86%E9%9F%B3%E6%A8%82%E5%B0%88%E6%A5%AD-50.htm?page=5&userobot=1" },
+      { label: "111 中區縣市政府教師甄選策略聯盟：國中音樂", level: "國中", year: "111", url: "https://yamol.tw/cat-%E6%95%99%E7%94%84%E2%97%86%E9%9F%B3%E6%A8%82%E5%B0%88%E6%A5%AD-50.htm?page=8&userobot=1" },
+      { label: "110 桃園市國民中學新進教師聯合甄選：音樂科", level: "國中", year: "110", url: "https://yamol.tw/cat-%E6%95%99%E7%94%84%E2%97%86%E9%9F%B3%E6%A8%82%E5%B0%88%E6%A5%AD-50.htm?page=10&userobot=1" }
+    ];
+
+    const questions = [
+      {
+        topic: "樂理與和聲",
+        chapter: "theory",
+        level: "國中",
+        source: 0,
+        prompt: "若題目要求判斷「V7 到 I」在大調中的功能，最適合的說法是哪一項？",
+        options: ["屬於正格終止，具有強烈回到主和弦的效果", "屬於變格終止，常見進行是 IV 到 I", "屬於欺騙終止，通常解決到 vi", "屬於半終止，結束在屬和弦上"],
+        answer: 0,
+        explain: "V7-I 是典型正格終止。變格終止是 IV-I，欺騙終止常見 V-vi，半終止則停在 V。",
+        book: "功能和聲題常先看終點和弦，再看前一個和弦的功能。終止式是音樂科教甄樂理題的基本分。"
+      },
+      {
+        topic: "樂理與和聲",
+        chapter: "theory",
+        level: "高中",
+        source: 3,
+        prompt: "四部和聲寫作中，最需要避免的聲部進行是哪一項？",
+        options: ["外聲部形成連續平行五度", "女高音由導音上行到主音", "低音由屬音進行到主音", "共同音在同一聲部保留"],
+        answer: 0,
+        explain: "連續平行五度會破壞聲部獨立性，是傳統四部和聲的核心禁忌。其他選項多屬合理解決。",
+        book: "高中音樂科非選題常要求和聲寫作或錯誤辨識，平行五八度、導音解決與聲部交叉是優先檢查項。"
+      },
+      {
+        topic: "樂理與和聲",
+        chapter: "theory",
+        level: "國中",
+        source: 2,
+        prompt: "B♭ 單簧管看到譜上 C 音時，實際發出的音通常是什麼？",
+        options: ["B♭", "C", "D", "A"],
+        answer: 0,
+        explain: "B♭ 單簧管是移調樂器，記譜音比實音高大二度，因此譜上 C 實際聽起來是 B♭。",
+        book: "移調樂器題要記住方向：B♭ 樂器記譜高於實音大二度；F 法國號記譜高於實音完全五度。"
+      },
+      {
+        topic: "西洋音樂史",
+        chapter: "history",
+        level: "國中",
+        source: 1,
+        prompt: "下列哪一組最符合巴洛克時期常見關鍵字？",
+        options: ["通奏低音、賦格、協奏曲", "奏鳴曲式、均衡樂句、交響曲定型", "標題音樂、藝術歌曲、交響詩", "十二音列、機遇音樂、極簡主義"],
+        answer: 0,
+        explain: "通奏低音、賦格與協奏曲都是巴洛克高頻特徵。其他選項分別較接近古典、浪漫與二十世紀音樂。",
+        book: "西洋音樂史題常用關鍵字配對時期；先抓樂種、織度與代表人物。"
+      },
+      {
+        topic: "西洋音樂史",
+        chapter: "history",
+        level: "高中",
+        source: 3,
+        prompt: "若試題問到「藝術歌曲 Lied」與鋼琴伴奏的詩意描繪，最常連結哪一時期？",
+        options: ["浪漫時期", "文藝復興", "中世紀", "早期巴洛克"],
+        answer: 0,
+        explain: "Lied 與舒伯特等作曲家密切相關，是浪漫時期常考的聲樂體裁。",
+        book: "浪漫時期要掌握藝術歌曲、標題音樂、交響詩、鋼琴小品與民族樂派。"
+      },
+      {
+        topic: "西洋音樂史",
+        chapter: "history",
+        level: "高中",
+        source: 5,
+        prompt: "奏鳴曲式的再現部通常最重要的功能是什麼？",
+        options: ["讓主要主題材料回到主調形成結構回歸", "完全改用新主題避免重複", "只保留發展部的轉調片段", "固定以賦格方式處理全部材料"],
+        answer: 0,
+        explain: "奏鳴曲式再現部通常讓第一、第二主題材料回到主調，完成調性與形式上的回歸。",
+        book: "曲式分析要看主題、調性、終止與段落功能；奏鳴曲式重點是呈示、發展、再現。"
+      },
+      {
+        topic: "台灣與中國音樂",
+        chapter: "taiwan",
+        level: "國中",
+        source: 0,
+        prompt: "南管與北管比較時，下列哪一項較合理？",
+        options: ["南管風格較細緻典雅，北管常與廟會戲曲場景連結", "南管主要使用西洋管弦樂編制", "北管只用於現代流行歌曲伴奏", "兩者皆屬十二音列音樂"],
+        answer: 0,
+        explain: "南管常被描述為細緻、典雅；北管常見於民間戲曲、廟會與儀式活動。",
+        book: "台灣傳統音樂是近五年高頻領域，需分清樂種、場合、樂器、聲響與文化脈絡。"
+      },
+      {
+        topic: "台灣與中國音樂",
+        chapter: "taiwan",
+        level: "國中",
+        source: 1,
+        prompt: "歌仔戲最適合被歸入哪一類重點？",
+        options: ["台灣在地發展的傳統戲曲", "歐洲古典歌劇", "日本雅樂", "印度拉格音樂"],
+        answer: 0,
+        explain: "歌仔戲是在台灣發展成熟的重要傳統戲曲，常考唱腔、伴奏、劇種與文化背景。",
+        book: "台灣音樂題不只背名稱，還要能連結產地、表演型態、伴奏樂器與社會功能。"
+      },
+      {
+        topic: "台灣與中國音樂",
+        chapter: "taiwan",
+        level: "高中",
+        source: 4,
+        prompt: "若要設計一堂原住民族音樂鑑賞課，最不恰當的做法是哪一項？",
+        options: ["只要求學生模仿聲音效果，不討論文化脈絡與族群尊重", "介紹音樂與祭儀、生活、語言的關係", "引導學生聽辨織度、節奏與唱法特徵", "討論資料來源與文化挪用的界線"],
+        answer: 0,
+        explain: "原住民族音樂教學需重視文化脈絡、尊重與來源倫理，不能只把音樂當成聲響材料模仿。",
+        book: "素養導向音樂教學常把音樂元素與文化理解一起考，尤其是台灣在地音樂。"
+      },
+      {
+        topic: "樂器與配器",
+        chapter: "instrumentation",
+        level: "國中",
+        source: 2,
+        prompt: "下列哪一項屬於木管樂器？",
+        options: ["雙簧管", "小號", "定音鼓", "中提琴"],
+        answer: 0,
+        explain: "雙簧管屬木管。小號屬銅管，定音鼓屬打擊，中提琴屬弦樂。",
+        book: "樂器分類題是基本題，但常延伸到音域、音色、移調與樂團位置。"
+      },
+      {
+        topic: "樂器與配器",
+        chapter: "instrumentation",
+        level: "高中",
+        source: 3,
+        prompt: "為國中班級合奏改編旋律時，哪一項最符合教學現場需求？",
+        options: ["考慮學生程度、音域、節奏負荷與聲部平衡", "每個聲部都使用最高難度技巧", "忽略樂器音域以保留原譜音高", "只讓音量最大的樂器演奏主旋律"],
+        answer: 0,
+        explain: "教學配器應兼顧可演奏性、音域、節奏難度、主從關係與班級程度。",
+        book: "高中非選題常要求把專業知識轉成教學應用，配器不是炫技，而是讓學生能學會。"
+      },
+      {
+        topic: "樂器與配器",
+        chapter: "instrumentation",
+        level: "高中",
+        source: 5,
+        prompt: "舞蹈伴奏能力題最可能評量哪一組能力？",
+        options: ["節奏穩定、曲風辨識、即興與跟隨動作", "只背誦西洋音樂史年代", "只辨認國樂器圖片", "只計算十二平均律頻率"],
+        answer: 0,
+        explain: "舞蹈伴奏重視節奏、速度、段落、即興反應與動作配合。",
+        book: "伴奏類試題會把音樂專業與實務反應結合，需熟悉曲風、節奏型與現場調整。"
+      },
+      {
+        topic: "課綱、教學與評量",
+        chapter: "pedagogy",
+        level: "國中",
+        source: 0,
+        prompt: "素養導向音樂課最應該強調哪一項？",
+        options: ["在情境任務中運用音樂知識、技能與態度解決問題", "只要求學生背完所有作曲家出生年份", "完全取消音樂知識教學", "只用紙筆測驗評量演奏能力"],
+        answer: 0,
+        explain: "素養導向並非不要知識，而是讓學生在情境中整合知識、技能與態度。",
+        book: "108 課綱題常考學習表現、核心素養、情境任務、實作評量與反思。"
+      },
+      {
+        topic: "課綱、教學與評量",
+        chapter: "pedagogy",
+        level: "高中",
+        source: 4,
+        prompt: "設計音樂實作評量規準時，哪一組向度最完整？",
+        options: ["音準、節奏、表情、合作、反思", "座號、身高、制服顏色、出席座位", "只看是否交作業", "只看學生是否喜歡老師"],
+        answer: 0,
+        explain: "音樂實作評量需對應可觀察表現，例如音準、節奏、音樂性、合作與反思。",
+        book: "評量題要能區分形成性、總結性、實作評量與規準設計。"
+      },
+      {
+        topic: "課綱、教學與評量",
+        chapter: "pedagogy",
+        level: "高中",
+        source: 3,
+        prompt: "音樂鑑賞教學若要避免流於感想，最應加入哪一項？",
+        options: ["引導學生用旋律、節奏、音色、曲式等音樂元素描述聆聽證據", "要求學生只寫好聽或不好聽", "只播放音樂不提問", "只考作曲家生日"],
+        answer: 0,
+        explain: "鑑賞教學需讓學生以音樂元素提出可討論的聆聽證據，而不只是主觀喜好。",
+        book: "鑑賞題常要求教師把聽覺經驗轉成可學習、可評量的任務。"
+      },
+      {
+        topic: "數位、AI 與音樂科技",
+        chapter: "digital",
+        level: "國中",
+        source: 0,
+        prompt: "使用 AI 產生伴奏讓學生練唱時，教師最應先檢核什麼？",
+        options: ["音樂內容正確性、授權來源、是否符合學習目標", "AI 產出越快就一定越好", "只要學生覺得新奇即可", "不需要任何教師判斷"],
+        answer: 0,
+        explain: "AI 可輔助教學，但教師仍需檢查內容正確性、著作權、偏誤與學習目標對齊。",
+        book: "最新年度題目開始出現 AI 與數位工具，重點在教學判斷，不是工具名稱。"
+      },
+      {
+        topic: "數位、AI 與音樂科技",
+        chapter: "digital",
+        level: "高中",
+        source: 3,
+        prompt: "下列哪一項最符合數位音樂工具融入教學的原則？",
+        options: ["先設定學習目標，再選擇能留下學習證據的工具", "先選最炫的軟體，再想課程目標", "所有學生都做同一個高難度編曲任務", "只評量軟體操作速度"],
+        answer: 0,
+        explain: "科技融入應回到學習目標、學習歷程與評量證據，不應以工具本身取代教學設計。",
+        book: "數位學習題常把工具、任務、評量與差異化放在一起考。"
+      },
+      {
+        topic: "台灣與中國音樂",
+        chapter: "taiwan",
+        level: "國中",
+        source: 7,
+        prompt: "國樂器分類中，哪一組都屬於彈撥樂器？",
+        options: ["琵琶、古箏、揚琴", "二胡、高胡、中胡", "笛、笙、嗩吶", "鑼、鼓、鈸"],
+        answer: 0,
+        explain: "琵琶、古箏、揚琴屬彈撥類；二胡類為拉弦，笛笙嗩吶為吹管，鑼鼓鈸為打擊。",
+        book: "國樂器題常考吹、拉、彈、打分類，以及樂器音色和演奏方式。"
+      },
+      {
+        topic: "樂理與和聲",
+        chapter: "theory",
+        level: "高中",
+        source: 4,
+        prompt: "判斷一段旋律是否轉調時，最可靠的線索通常是哪一項？",
+        options: ["新調的導音、屬和弦與終止式是否穩定出現", "音量是否突然變大", "速度是否變快", "樂器數量是否增加"],
+        answer: 0,
+        explain: "轉調判斷要看新調中心是否被建立，導音、屬功能與終止式是重要證據。",
+        book: "調性與轉調題不能只看臨時記號，要看和聲功能與句末終止。"
+      },
+      {
+        topic: "西洋音樂史",
+        chapter: "history",
+        level: "高中",
+        source: 5,
+        prompt: "印象樂派音樂常被描述為哪一種特徵？",
+        options: ["重視音色、全音音階、五聲音階與朦朧和聲色彩", "嚴格只使用通奏低音", "以十二音列作為唯一技法", "只採用中世紀葛利果聖歌單旋律"],
+        answer: 0,
+        explain: "印象樂派常考 Debussy、Ravel，以及音色、模糊調性、全音音階、五聲音階等特徵。",
+        book: "現代前後的風格題要把印象、表現、十二音、機遇、極簡分開記。"
+      },
+      {
+        topic: "課綱、教學與評量",
+        chapter: "pedagogy",
+        level: "國中",
+        source: 1,
+        prompt: "一份素養導向音樂教案中，哪一項最能作為「可觀察的學習表現」？",
+        options: ["學生能以節奏、音色與曲式說明聆賞判斷", "學生覺得課程很有趣", "教師播放三首作品", "教室有良好音響設備"],
+        answer: 0,
+        explain: "可觀察表現要能被檢核，能說明聆賞判斷比單純感受、設備或教師活動更適合。",
+        book: "教案題要把目標、活動與評量對齊；評量語句應描述學生能做出什麼。"
+      },
+      {
+        topic: "課綱、教學與評量",
+        chapter: "pedagogy",
+        level: "高中",
+        source: 3,
+        prompt: "若試題要求設計跨域音樂課，哪一項最符合跨域精神？",
+        options: ["用音樂元素連結歷史、語文或科技任務，並保留音樂學習目標", "把音樂課全部改成歷史講授", "只讓學生查資料不聽音樂", "完全取消評量"],
+        answer: 0,
+        explain: "跨域不是犧牲音樂，而是讓音樂核心學習與其他領域任務互相支撐。",
+        book: "跨域教學題常要求教師守住音樂本質，同時建立情境任務與可評量成果。"
+      },
+      {
+        topic: "樂理與和聲",
+        chapter: "theory",
+        level: "國中",
+        source: 8,
+        prompt: "下列哪一組音程名稱最可能描述 C 到 G？",
+        options: ["完全五度", "大三度", "小六度", "增四度"],
+        answer: 0,
+        explain: "C 到 G 跨五個音名，且在自然音階中為完全五度。",
+        book: "音程題先數音名距離，再判斷大、小、完全、增、減。"
+      },
+      {
+        topic: "樂理與和聲",
+        chapter: "theory",
+        level: "高中",
+        source: 4,
+        prompt: "分析樂句時，哪一項最能幫助判斷段落結束？",
+        options: ["終止式、長音、休止與調性穩定", "紙張頁碼", "樂譜裝訂方式", "作曲家肖像大小"],
+        answer: 0,
+        explain: "段落結束通常會透過終止式、節奏停頓、長音或調性穩定形成結構線索。",
+        book: "曲式分析不是看表面分行，而是看音樂語法：樂句、終止、主題與調性。"
+      },
+      {
+        topic: "西洋音樂史",
+        chapter: "history",
+        level: "國中",
+        source: 2,
+        prompt: "下列哪位作曲家最常與古典時期交響曲、弦樂四重奏發展連結？",
+        options: ["Haydn", "Palestrina", "Schoenberg", "Machaut"],
+        answer: 0,
+        explain: "Haydn 常被稱為交響曲之父、弦樂四重奏之父，是古典時期核心人物。",
+        book: "人物題要用時期、體裁與代表貢獻一起記，比只背姓名更穩。"
+      },
+      {
+        topic: "西洋音樂史",
+        chapter: "history",
+        level: "高中",
+        source: 6,
+        prompt: "十二音技法最常與哪位作曲家連結？",
+        options: ["Schoenberg", "Vivaldi", "Schubert", "Haydn"],
+        answer: 0,
+        explain: "Schoenberg 是十二音技法的重要建立者，常與表現主義、無調性脈絡一起考。",
+        book: "二十世紀音樂需掌握技法與人物配對：十二音、機遇、極簡、電子音樂等。"
+      },
+      {
+        topic: "台灣與中國音樂",
+        chapter: "taiwan",
+        level: "高中",
+        source: 4,
+        prompt: "比較南管與北管時，若題目問「常見於民間迎神賽會、聲響較熱鬧」較可能指哪一類？",
+        options: ["北管", "南管", "葛利果聖歌", "十二音列音樂"],
+        answer: 0,
+        explain: "北管常與民間廟會、戲曲、迎神賽會等場景連結，聲響較外放熱鬧。",
+        book: "台灣傳統音樂題常用表演場合與聲響特徵作為辨識線索。"
+      },
+      {
+        topic: "台灣與中國音樂",
+        chapter: "taiwan",
+        level: "國中",
+        source: 7,
+        prompt: "下列哪一項最適合描述客家八音在課堂中的教學切入？",
+        options: ["從儀式、聚落生活、樂器編制與地方文化連結", "只討論歐洲歌劇詠嘆調", "只介紹十二音列序列", "只練習爵士鼓獨奏"],
+        answer: 0,
+        explain: "客家八音屬台灣地方傳統音樂，適合從生活文化、儀式功能與樂器編制切入。",
+        book: "在地音樂教學要兼顧音樂元素與文化脈絡，避免只剩名詞記憶。"
+      },
+      {
+        topic: "樂器與配器",
+        chapter: "instrumentation",
+        level: "國中",
+        source: 1,
+        prompt: "管弦樂團中，長笛、雙簧管、單簧管、低音管通常屬於哪一族？",
+        options: ["木管樂器", "銅管樂器", "弦樂器", "鍵盤樂器"],
+        answer: 0,
+        explain: "這四種都是常見木管樂器，雖然長笛現代材質多為金屬，分類仍屬木管。",
+        book: "樂器分類要依演奏發聲與樂團傳統分類，不只看材質。"
+      },
+      {
+        topic: "樂器與配器",
+        chapter: "instrumentation",
+        level: "高中",
+        source: 3,
+        prompt: "為學生合唱設計鋼琴伴奏時，哪一項最能支援演唱？",
+        options: ["清楚給出調性、節奏脈動與呼吸句法", "全程用極高音域快速炫技", "刻意蓋過人聲", "完全不考慮歌詞分句"],
+        answer: 0,
+        explain: "伴奏的任務是支援歌唱，應提供調性、節奏、句法與呼吸提示，並保持音量平衡。",
+        book: "伴奏題常考實務判斷：支援主體、控制音量、掌握句法與風格。"
+      },
+      {
+        topic: "數位、AI 與音樂科技",
+        chapter: "digital",
+        level: "國中",
+        source: 0,
+        prompt: "學生用線上素材做音樂簡報時，教師最應提醒哪一件事？",
+        options: ["確認授權、標示來源並避免侵權使用", "網路找到就一定可以任意使用", "只要放在作業裡就不用標示", "音樂素材沒有著作權問題"],
+        answer: 0,
+        explain: "數位音樂學習需重視著作權、授權與來源標示，這也是媒體素養的一部分。",
+        book: "音樂科技題不只考工具操作，也會考倫理、授權、資料來源與教師把關。"
+      },
+      {
+        topic: "數位、AI 與音樂科技",
+        chapter: "digital",
+        level: "高中",
+        source: 3,
+        prompt: "若用錄音 App 進行演奏回饋，最好的使用方式是哪一項？",
+        options: ["讓學生依規準聽回自己的音準、節奏與表情並修正", "只錄音但不回聽", "只比較誰聲音最大", "用 App 取代所有教師回饋"],
+        answer: 0,
+        explain: "錄音工具的價值在於留下學習證據，支持自評、同儕回饋與修正。",
+        book: "數位工具要能服務學習歷程與評量證據，才是有效融入。"
+      }
+    ];
+
+    const state = {
+      mode: "practice",
+      filtered: [],
+      index: 0,
+      selected: null,
+      answered: 0,
+      correct: 0,
+      streak: 0,
+      locked: false,
+      mistakes: []
+    };
+
+    const els = {
+      topicFilter: document.getElementById("topicFilter"),
+      levelFilter: document.getElementById("levelFilter"),
+      questionTitle: document.getElementById("questionTitle"),
+      questionTags: document.getElementById("questionTags"),
+      questionText: document.getElementById("questionText"),
+      options: document.getElementById("options"),
+      feedback: document.getElementById("feedback"),
+      focusBook: document.getElementById("focusBook"),
+      sourceText: document.getElementById("sourceText"),
+      sourceLink: document.getElementById("sourceLink"),
+      answeredCount: document.getElementById("answeredCount"),
+      correctCount: document.getElementById("correctCount"),
+      accuracyRate: document.getElementById("accuracyRate"),
+      streakCount: document.getElementById("streakCount"),
+      progressBar: document.getElementById("progressBar"),
+      practiceView: document.getElementById("practiceView"),
+      bookView: document.getElementById("bookView"),
+      mistakesView: document.getElementById("mistakesView"),
+      sourcesView: document.getElementById("sourcesView"),
+      bookGrid: document.getElementById("bookGrid"),
+      chapterDetail: document.getElementById("chapterDetail"),
+      sourcesList: document.getElementById("sourcesList"),
+      mistakesList: document.getElementById("mistakesList")
+    };
+
+    function init() {
+      loadSavedState();
+      const topics = ["全部", ...Array.from(new Set(questions.map(q => q.topic)))];
+      els.topicFilter.innerHTML = topics.map(topic => `<option value="${topic === "全部" ? "all" : topic}">${topic}</option>`).join("");
+      bindEvents();
+      buildBook();
+      buildSources();
+      renderMistakes();
+      startRound();
+      updateStats();
+    }
+
+    function bindEvents() {
+      document.querySelectorAll(".mode-tabs button").forEach(button => {
+        button.addEventListener("click", () => switchMode(button.dataset.mode));
+      });
+      els.topicFilter.addEventListener("change", startRound);
+      els.levelFilter.addEventListener("change", startRound);
+      document.getElementById("newRoundBtn").addEventListener("click", startRound);
+      document.getElementById("resetBtn").addEventListener("click", resetStats);
+      document.getElementById("printBtn").addEventListener("click", () => window.print());
+      document.getElementById("clearMistakesBtn").addEventListener("click", clearMistakes);
+      document.getElementById("checkBtn").addEventListener("click", checkAnswer);
+      document.getElementById("nextBtn").addEventListener("click", nextQuestion);
+    }
+
+    function switchMode(mode) {
+      state.mode = mode;
+      document.querySelectorAll(".mode-tabs button").forEach(button => button.classList.toggle("active", button.dataset.mode === mode));
+      els.practiceView.classList.toggle("hidden", mode !== "practice");
+      els.bookView.classList.toggle("hidden", mode !== "book");
+      els.mistakesView.classList.toggle("hidden", mode !== "mistakes");
+      els.sourcesView.classList.toggle("hidden", mode !== "sources");
+    }
+
+    function startRound() {
+      const topic = els.topicFilter.value;
+      const level = els.levelFilter.value;
+      state.filtered = questions.filter(q => (topic === "all" || q.topic === topic) && (level === "all" || q.level === level));
+      if (!state.filtered.length) {
+        state.filtered = questions.slice();
+      }
+      state.index = 0;
+      state.selected = null;
+      state.locked = false;
+      renderQuestion();
+      switchMode("practice");
+    }
+
+    function currentQuestion() {
+      return state.filtered[state.index % state.filtered.length];
+    }
+
+    function renderQuestion() {
+      const q = currentQuestion();
+      const src = sources[q.source];
+      const chapter = chapters.find(c => c.id === q.chapter);
+      state.selected = null;
+      state.locked = false;
+      els.feedback.className = "feedback";
+      els.feedback.innerHTML = "";
+      els.questionTitle.textContent = `第 ${state.index + 1} 題`;
+      els.questionTags.innerHTML = [
+        `<span class="tag major">${q.topic}</span>`,
+        `<span class="tag">${q.level}</span>`,
+        `<span class="tag warn">${src.year}</span>`
+      ].join("");
+      els.questionText.textContent = q.prompt;
+      els.options.innerHTML = q.options.map((option, idx) => `
+        <button class="option" data-index="${idx}">
+          <span class="letter">${String.fromCharCode(65 + idx)}</span>
+          <span>${option}</span>
+        </button>
+      `).join("");
+      els.options.querySelectorAll(".option").forEach(button => {
+        button.addEventListener("click", () => selectOption(Number(button.dataset.index)));
+      });
+      els.focusBook.innerHTML = `
+        <h3>${chapter.title}</h3>
+        <p>${q.book}</p>
+        <ul>${chapter.points.slice(0, 3).map(point => `<li>${point}</li>`).join("")}</ul>
+      `;
+      els.sourceText.textContent = `${src.year}｜${src.level}｜${src.label}`;
+      els.sourceLink.href = src.url;
+      updateProgress();
+    }
+
+    function selectOption(index) {
+      if (state.locked) return;
+      state.selected = index;
+      els.options.querySelectorAll(".option").forEach(button => {
+        button.classList.toggle("selected", Number(button.dataset.index) === index);
+      });
+    }
+
+    function checkAnswer() {
+      if (state.selected === null || state.locked) return;
+      const q = currentQuestion();
+      state.locked = true;
+      const isCorrect = state.selected === q.answer;
+      state.answered += 1;
+      if (isCorrect) {
+        state.correct += 1;
+        state.streak += 1;
+      } else {
+        state.streak = 0;
+        addMistake(q, state.selected);
+      }
+      els.options.querySelectorAll(".option").forEach(button => {
+        const idx = Number(button.dataset.index);
+        button.classList.toggle("correct", idx === q.answer);
+        button.classList.toggle("incorrect", idx === state.selected && !isCorrect);
+      });
+      els.feedback.className = `feedback show ${isCorrect ? "" : "bad"}`;
+      els.feedback.innerHTML = `
+        <h3>${isCorrect ? "答對" : "再確認一次"}：正解 ${String.fromCharCode(65 + q.answer)}</h3>
+        <p>${q.explain}</p>
+      `;
+      updateStats();
+      saveState();
+    }
+
+    function nextQuestion() {
+      state.index = (state.index + 1) % state.filtered.length;
+      renderQuestion();
+    }
+
+    function resetStats() {
+      state.answered = 0;
+      state.correct = 0;
+      state.streak = 0;
+      updateStats();
+      saveState();
+    }
+
+    function updateStats() {
+      els.answeredCount.textContent = state.answered;
+      els.correctCount.textContent = state.correct;
+      els.streakCount.textContent = state.streak;
+      els.accuracyRate.textContent = state.answered ? `${Math.round((state.correct / state.answered) * 100)}%` : "0%";
+    }
+
+    function updateProgress() {
+      const width = state.filtered.length ? ((state.index + 1) / state.filtered.length) * 100 : 0;
+      els.progressBar.style.width = `${width}%`;
+    }
+
+    function buildBook() {
+      els.bookGrid.innerHTML = chapters.map((chapter, index) => `
+        <button class="chapter ${index === 0 ? "active" : ""}" data-id="${chapter.id}">
+          <h3>${chapter.title}</h3>
+          <p>${chapter.summary}</p>
+        </button>
+      `).join("");
+      els.bookGrid.querySelectorAll(".chapter").forEach(button => {
+        button.addEventListener("click", () => showChapter(button.dataset.id));
+      });
+      showChapter(chapters[0].id);
+    }
+
+    function showChapter(id) {
+      const chapter = chapters.find(c => c.id === id);
+      els.bookGrid.querySelectorAll(".chapter").forEach(button => button.classList.toggle("active", button.dataset.id === id));
+      els.chapterDetail.innerHTML = `
+        <h2>${chapter.title}</h2>
+        <p>${chapter.summary}</p>
+        <ul>${chapter.points.map(point => `<li>${point}</li>`).join("")}</ul>
+      `;
+    }
+
+    function buildSources() {
+      els.sourcesList.innerHTML = sources.map(source => `
+        <div class="source-card">
+          <strong>${source.year}｜${source.level}</strong>
+          <span>${source.label}</span>
+          <a href="${source.url}" target="_blank" rel="noopener">開啟來源</a>
+        </div>
+      `).join("");
+    }
+
+    function addMistake(question, selected) {
+      const source = sources[question.source];
+      const key = `${question.prompt}-${selected}`;
+      if (state.mistakes.some(item => item.key === key)) return;
+      state.mistakes.unshift({
+        key,
+        topic: question.topic,
+        level: question.level,
+        prompt: question.prompt,
+        selected: question.options[selected],
+        correct: question.options[question.answer],
+        explain: question.explain,
+        book: question.book,
+        source: `${source.year}｜${source.level}｜${source.label}`,
+        url: source.url
+      });
+      state.mistakes = state.mistakes.slice(0, 30);
+      renderMistakes();
+    }
+
+    function renderMistakes() {
+      if (!state.mistakes.length) {
+        els.mistakesList.innerHTML = `<div class="source-card"><strong>目前沒有錯題</strong><span>開始練題後，答錯的題目會自動出現在這裡。</span></div>`;
+        return;
+      }
+      els.mistakesList.innerHTML = state.mistakes.map(item => `
+        <article class="mistake-item">
+          <div class="tag-row">
+            <span class="tag major">${item.topic}</span>
+            <span class="tag">${item.level}</span>
+          </div>
+          <h3>${item.prompt}</h3>
+          <p><strong>你的答案：</strong>${item.selected}</p>
+          <p><strong>正確答案：</strong>${item.correct}</p>
+          <p><strong>解析：</strong>${item.explain}</p>
+          <p><strong>書本重點：</strong>${item.book}</p>
+          <div class="source-card">
+            <strong>依據考題</strong>
+            <span>${item.source}</span>
+            <a href="${item.url}" target="_blank" rel="noopener">開啟來源</a>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function clearMistakes() {
+      state.mistakes = [];
+      renderMistakes();
+      saveState();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem("musicExamTrainerState", JSON.stringify({
+          answered: state.answered,
+          correct: state.correct,
+          streak: state.streak,
+          mistakes: state.mistakes
+        }));
+      } catch (error) {
+        // Local file or private browsing may block storage; the app still works without saving.
+      }
+    }
+
+    function loadSavedState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("musicExamTrainerState") || "{}");
+        state.answered = Number(saved.answered || 0);
+        state.correct = Number(saved.correct || 0);
+        state.streak = Number(saved.streak || 0);
+        state.mistakes = Array.isArray(saved.mistakes) ? saved.mistakes : [];
+      } catch (error) {
+        state.mistakes = [];
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
